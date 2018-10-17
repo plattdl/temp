@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+  title: STERN Profile API
+  version: v1
+  description: This API is for getting information about Stern Profiles.
+  contact:
+    name: Harris Corporation
+    email: support@harris.com
+    url: 'https://www.harrisgeospatial.com/'
+security:
+  - ApiKeyAuth: []
+servers:
+  - url: 'https://api.harrisgeospatial.com/profile'
+paths:
+  /users:
+    post:
+      summary: Create Profile
+      requestBody:
+        description: The New Profile
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newUserProfile'
+      responses:
+        '201':
+          description: Profile created
+          headers:
+            Location:
+              description: URL to the profile created
+              schema:
+                type: string
+                example: /users/15ffdc83-690b-41bc-b8cd-4923dab996c2
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/newUserProfileResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: API Key not found
+        '403':
+          description: API Key forbidden for this resource
+        '409':
+          description: Resource already created
+        '422':
+          description: Invalid Request Data
+  '/users/{id}':
+    get:
+      summary: Get profile information.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getUserProfileResponse'
+        '401':
+          description: API Key not found
+        '403':
+          description: API Key forbidden for this resource
+        '404':
+          description: Profile not found
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: The api key identifying the person making the request
+  parameters:
+    id:
+      in: path
+      name: id
+      schema:
+        $ref: '#/components/schemas/profileID'
+      required: true
+  schemas:
+    newUserProfile:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          example: dplatt04@harris.com
+        lastName:
+          type: string
+          example: Platt
+        firstName:
+          type: string
+          example: Daniel
+        companyName:
+          type: string
+          example: Harris Geospatial Solutions
+        streetAddress1:
+          type: string
+          example: 385 Interlocken Crescent
+          description: Used by crm
+        streetAddress2:
+          type: string
+          example: Suite 300
+          description: Used by crm
+        streetAddress3:
+          type: string
+          example: Desk 323-D
+          description: Used by crm
+        city:
+          type: string
+          example: Broomfield
+        region:
+          type: string
+          example: CO
+        country:
+          type: string
+          example: United States of America
+        zipCode:
+          type: string
+          example: 80021
+        phone:
+          type: string
+          example: 303-413-3928
+    profileID:
+      type: string
+      example: 15ffdc83-690b-41bc-b8cd-4923dab996c2
+    newUserProfileResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Profile created
+        _id:
+          $ref: '#/components/schemas/profileID'
+    getUserProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/newUserProfile'
+        - type: object
+          required:
+            - email
+            - profileID
+          properties:
+            _id:
+              $ref: '#/components/schemas/profileID'
